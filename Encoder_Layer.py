@@ -23,4 +23,4 @@ class PostionalEmbedding(nn.Module):
     def forward(self, x):
         seq_len=x.shape[1]
         return self.encoding[:seq_len,:]
-    
+
