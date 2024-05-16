@@ -9,6 +9,10 @@ def init_params():
     return [w, b]
 
 
+def l1_penalty(w):
+    return torch.sum(torch.abs(w))
+
+
 def l2_penalty(w):
     return torch.sum(w.pow(2)) / 2
 
@@ -30,6 +34,30 @@ def train(lambd):
             animator.add(epoch + 1, (d2l.evaluate_loss(net, train_iter, loss),
                                      d2l.evaluate_loss(net, test_iter, loss)))
     print('w的l2范数是：', torch.norm(w).item())
+
+
+def train_concise(wd):
+    net = nn.Sequential(nn.Linear(num_inputs, 1))
+    for param in net.parameters():
+        param.data.normal_()
+    loss = nn.MSELoss()
+    num_epochs, lr = 100, 0.003
+    trainer = torch.optim.SGD(
+        [{"params": net[0].weight, "weight_decay": wd}, {"params": net[0].bias}]
+        , lr=lr)
+    animator = d2l.Animator(xlabel='epochs', ylabel='loss', yscale='log',
+                            xlim=[5, num_epochs], legend=['train', 'test'])
+    for epoch in range(num_epochs):
+        for X, y in range(num_epochs):
+            trainer.zero_grad()
+            l = loss(net(X), y)
+            l.mean().backward()
+            trainer.step()
+        if (epoch + 1) % 5 == 0:
+            animator.add(epoch + 1,
+                         (d2l.evaluate_loss(net, train_iter, loss),
+                          d2l.evaluate_loss(net, test_iter, loss)))
+    print("w的L2范数：", net[0].weight.norm().item())
 
 
 if __name__ == "__main__":
